@@ -3,12 +3,13 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Day05Puzzle01
 {
     class Program
     {
-        struct Seat
+        struct Seat : IComparable<Seat>
         {
             public int Row { get; private set; }
             public int Column { get; private set; }
@@ -21,28 +22,7 @@ namespace Day05Puzzle01
                 Column = column;
             }
 
-            public Seat Before
-            {
-                get
-                {
-                    int row = Row;
-                    int col = Column;
-
-                    if (col == 0)
-                    {
-                        col = 7;
-                        row--;
-                    }
-                    else
-                    {
-                        col--;
-                    }
-
-                    return new Seat(row, col);
-                }
-            }
-
-            public Seat After
+            public Seat Next
             {
                 get
                 {
@@ -63,6 +43,18 @@ namespace Day05Puzzle01
                 }
             }
 
+            public static bool operator ==(Seat lhs, Seat rhs) => lhs.Equals(rhs);
+
+            public static bool operator !=(Seat lhs, Seat rhs) => !(lhs == rhs);
+
+            public static bool operator >(Seat lhs, Seat rhs) => lhs.CompareTo(rhs) > 0;
+
+            public static bool operator <(Seat lhs, Seat rhs) => !(lhs > rhs);
+
+            public static bool operator >=(Seat lhs, Seat rhs) => lhs.CompareTo(rhs) >= 0;
+
+            public static bool operator <=(Seat lhs, Seat rhs) => lhs.CompareTo(rhs) <= 0;
+
             public override bool Equals(object obj)
             {
                 if (!(obj is Seat)) return false;
@@ -78,76 +70,48 @@ namespace Day05Puzzle01
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(Row, Column, ID, Before, After);
+                return HashCode.Combine(Row, Column);
             }
+
+            public int CompareTo(Seat other) => ID - other.ID;
         }
 
         private static readonly Regex _seatCodeRegex = new Regex(@"^[FB]{7}[LR]{3}$");
 
         static void Main(string[] args)
         {
-            List<Seat> seats = ParseSeats().ToList();
+            var seats = new SortedSet<Seat>(ParseSeats());
 
-            int maxSeatID = seats.Max(x => x.ID);
+            int maxSeatID = seats.Max.ID;
             Console.WriteLine($"Max seat ID: {maxSeatID}");
 
             Seat mySeat = FindSeat(seats);
             Console.WriteLine($"My seat: {mySeat} - ID: {mySeat.ID}");
         }
 
-        static Seat FindSeat(List<Seat> existingSeats)
+        static Seat FindSeat(SortedSet<Seat> existingSeats)
         {
-            int minRow = existingSeats.Min(x => x.Row);
-            int maxRow = existingSeats.Max(x => x.Row);
-            var allRows = Enumerable.Range(minRow, maxRow - minRow + 1);
+            Seat firstSeat = existingSeats.Min;
+            Seat lastSeat = existingSeats.Max;
 
-            Seat? mySeat = null;
-
-            Console.WriteLine("    0123 4567");
-
-            for (int row = minRow; row < maxRow; row++)
+            for (int row = firstSeat.Row; row <= lastSeat.Row; row++)
             {
-                Console.Write(row.ToString().PadLeft(3) + " ");
-
                 for (int column = 0; column <= 7; column++)
                 {
-                    if (column == 4)
+                    Seat seat = new Seat(row, column);
+                    if (seat <= firstSeat || seat >= lastSeat)
                     {
-                        Console.Write(" ");
+                        continue;
                     }
 
-                    Seat seat = new Seat(row, column);
-
-                    //if (!existingSeats.Any(x => x.Row == row && x.Column == column))
                     if (!existingSeats.Contains(seat))
                     {
-                        Seat before = seat.Before;
-                        Seat after = seat.After;
-                        if (existingSeats.Contains(before) && existingSeats.Contains(after))
-                        {
-                            mySeat = seat;
-                            Console.Write("~");
-                        }
-                        else
-                        {
-                            Console.Write(".");
-                        }
-                    }
-                    else
-                    {
-                        Console.Write("#");
+                        return seat;
                     }
                 }
-
-                Console.WriteLine();
             }
 
-            if (!mySeat.HasValue)
-            {
-                throw new Exception("Unable to find my seat.");
-            }
-
-            return mySeat.Value;
+            throw new Exception("Unable to find my seat.");
         }
 
         static IEnumerable<Seat> ParseSeats()
@@ -157,7 +121,7 @@ namespace Day05Puzzle01
             while ((line = reader.ReadLine()) != null)
             {
                 Seat seat = ParseSeat(line.Trim());
-                Console.WriteLine($"{line}: row {seat.Row}, column {seat.Column}, seat ID {seat.ID}.");
+                // Console.WriteLine($"{line}: row {seat.Row}, column {seat.Column}, seat ID {seat.ID}.");
                 yield return seat;
             }
         }
