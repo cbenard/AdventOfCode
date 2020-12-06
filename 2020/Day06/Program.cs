@@ -37,14 +37,14 @@ namespace Day06
         {
             foreach (var item in GetCustomDeclarationYesAnswers())
             {
-                IEnumerable<char> yesAnswers = item[0];
+                IEnumerable<char> partyYesAnswers = item[0];
 
-                for (int i = 1; i < item.Count; i++)
+                foreach (var personYesAnswers in item)
                 {
-                    yesAnswers = yesAnswers.Intersect(item[i]);
+                    partyYesAnswers = partyYesAnswers.Intersect(personYesAnswers);
                 }
 
-                yield return yesAnswers.Count();
+                yield return partyYesAnswers.Count();
             }
         }
 
