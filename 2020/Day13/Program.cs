@@ -15,12 +15,12 @@ namespace Day13
         }
         static Departure FindDeparture(Schedule schedule)
         {
-            var busIDQuery = schedule.BusIDs
-                .Select(x => (x, (schedule.Timestamp / (decimal)x) - Math.Floor(schedule.Timestamp / (decimal)x)))
+            int busID = schedule.BusIDs
+                .Where(x => x.HasValue)
+                .Select(x => (x.Value, (schedule.Timestamp / (decimal)x.Value) - Math.Floor(schedule.Timestamp / (decimal)x.Value)))
                 .OrderByDescending(x => x.Item2 == 0)
-                .ThenByDescending(x => x.Item2);
-            int busID = busIDQuery
-                .Select(x => x.x)
+                .ThenByDescending(x => x.Item2)
+                .Select(x => x.Value)
                 .First();
             
             int timestamp = (schedule.Timestamp / busID) * busID;
@@ -49,8 +49,7 @@ namespace Day13
                 BusIDs = lines[1]
                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
                     .Select(x => x.Trim())
-                    .Where(x => x != "x")
-                    .Select(x => Int32.Parse(x))
+                    .Select(x => Int32.TryParse(x, out int parsed) ? (int?)parsed : null)
                     .ToArray(),
             };
         }
@@ -59,7 +58,7 @@ namespace Day13
     struct Schedule
     {
         public int Timestamp;
-        public int[] BusIDs;
+        public int?[] BusIDs;
     }
 
     struct Departure
