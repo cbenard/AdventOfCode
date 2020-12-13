@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -12,7 +13,42 @@ namespace Day13
             Departure departure = FindDeparture(schedule);
             Console.WriteLine($"Departure: Bus {departure.BusID} at {departure.Timestamp}");
             Console.WriteLine($"Minutes Waited ({departure.Timestamp - schedule.Timestamp}) * Bus ID ({departure.BusID}) = {(departure.Timestamp - schedule.Timestamp) * departure.BusID}");
+            long sequentialScheduleTimestamp = FindSequentialScheduleTimestamp(schedule);
+            Console.WriteLine($"Sequential Schedule Timestamp: {sequentialScheduleTimestamp}");
         }
+
+        // Adapted from https://github.com/constb/aoc2020/blob/main/13/index2.js
+        // because I didn't really understand the Chinese Remainder Theorem
+        static long FindSequentialScheduleTimestamp(Schedule schedule)
+        {
+            List<ModulusResult> modulusResults = new();
+
+            for (int i = 0; i < schedule.BusIDs.Length; i++)
+            {
+                if (!schedule.BusIDs[i].HasValue) continue;
+
+                int busID = schedule.BusIDs[i].Value;
+                modulusResults.Add(new ModulusResult
+                {
+                    Modulo = busID,
+                    Remainder = (busID - (i % busID)) % busID,
+                });
+            }
+
+            var largestFirst = modulusResults.OrderByDescending(x => x.Modulo).ToArray();
+
+            long val = 0;
+            long step = 1;
+
+            for (long i = 0; i < largestFirst.Length; i++)
+            {
+                while (val % largestFirst[i].Modulo != largestFirst[i].Remainder) val += step;
+                step *= largestFirst[i].Modulo;
+            }
+            
+            return val;
+        }
+
         static Departure FindDeparture(Schedule schedule)
         {
             int busID = schedule.BusIDs
@@ -22,8 +58,8 @@ namespace Day13
                 .ThenByDescending(x => x.Item2)
                 .Select(x => x.Value)
                 .First();
-            
-            int timestamp = (schedule.Timestamp / busID) * busID;
+
+            long timestamp = (schedule.Timestamp / busID) * busID;
             if (timestamp < schedule.Timestamp)
             {
                 timestamp += busID;
@@ -55,6 +91,12 @@ namespace Day13
         }
     }
 
+    struct ModulusResult
+    {
+        public int Modulo;
+        public int Remainder;
+    }
+
     struct Schedule
     {
         public int Timestamp;
@@ -64,6 +106,6 @@ namespace Day13
     struct Departure
     {
         public int BusID;
-        public int Timestamp;
+        public long Timestamp;
     }
 }
