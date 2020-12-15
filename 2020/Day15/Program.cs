@@ -54,6 +54,10 @@ namespace Day15
                 if (history.TryGetValue(nowSpoken, out List<int> historyForNowSpoken))
                 {
                     historyForNowSpoken.Add(turn);
+                    if (historyForNowSpoken.Count > 2)
+                    {
+                        historyForNowSpoken.RemoveAt(0);
+                    }
                 }
                 else
                 {
