@@ -174,6 +174,8 @@ namespace Day16
                     continue;
                 }
 
+                if (line.Length == 0) break;
+
                 yield return LineToIntArray(line);
             }
         }
