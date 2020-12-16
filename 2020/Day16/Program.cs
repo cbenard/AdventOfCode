@@ -57,6 +57,7 @@ namespace Day16
         static Dictionary<string, int> CreateRuleMap(Dictionary<string, int[]> rules, List<int[]> validTickets)
         {
             Dictionary<string, int> ruleMap = new();
+            HashSet<int> mappedColumns = new();
 
             int[][] columns = new int[validTickets[0].Length][];
             for (int i = 0; i < validTickets[0].Length; i++)
@@ -68,6 +69,8 @@ namespace Day16
             {
                 for (int column = 0; column < columns.Length; column++)
                 {
+                    if (mappedColumns.Contains(column)) continue;
+
                     int[] values = columns[column];
                     string possibleRuleKey = null;
 
@@ -89,6 +92,7 @@ namespace Day16
                     if (possibleRuleKey != null)
                     {
                         ruleMap.Add(possibleRuleKey, column);
+                        mappedColumns.Add(column);
                     }
                 }
             }
