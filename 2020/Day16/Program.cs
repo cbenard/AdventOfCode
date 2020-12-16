@@ -15,8 +15,8 @@ namespace Day16
         {
             string filename = "input.txt";
             Dictionary<string, int[]> rules = ParseRules(filename);
-            IEnumerable<int[]> nearbyTickets = ParseNearbyTickets(filename);
-            int[] myTicket = ParseMyTicket(filename);
+            IEnumerable<int[]> nearbyTickets = ParseTickets(filename, "nearby tickets:");
+            int[] myTicket = ParseTickets(filename, "your ticket:").First();
 
             Stopwatch watch = new();
             watch.Start();
@@ -161,7 +161,7 @@ namespace Day16
             return rules;
         }
 
-        static int[] ParseMyTicket(string filename)
+        static IEnumerable<int[]> ParseTickets(string filename, string prefix)
         {
             Dictionary<string, int[]> rules = new();
 
@@ -170,26 +170,7 @@ namespace Day16
             {
                 if (!ready)
                 {
-                    if (line == "your ticket:") ready = true;
-                    continue;
-                }
-
-                return LineToIntArray(line);
-            }
-
-            throw new Exception("Didn't find my ticket.");
-        }
-
-        static IEnumerable<int[]> ParseNearbyTickets(string filename)
-        {
-            Dictionary<string, int[]> rules = new();
-
-            bool ready = false;
-            foreach (string line in File.ReadLines(filename).Select(x => x.TrimEnd()))
-            {
-                if (!ready)
-                {
-                    if (line == "nearby tickets:") ready = true;
+                    if (line == prefix) ready = true;
                     continue;
                 }
 
