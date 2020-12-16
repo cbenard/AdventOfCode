@@ -69,7 +69,7 @@ namespace Day16
                 for (int column = 0; column < columns.Length; column++)
                 {
                     int[] values = columns[column];
-                    List<string> possibleRuleKeys = new();
+                    string possibleRuleKey = null;
 
                     foreach (KeyValuePair<string, int[]> rule in rules)
                     {
@@ -77,13 +77,18 @@ namespace Day16
 
                         if (values.All(x => IsValidNumberForRule(x, rule.Value)))
                         {
-                            possibleRuleKeys.Add(rule.Key);
+                            if (possibleRuleKey != null)
+                            {
+                                possibleRuleKey = null;
+                                break;
+                            }
+                            possibleRuleKey = rule.Key;
                         }
                     }
 
-                    if (possibleRuleKeys.Count == 1)
+                    if (possibleRuleKey != null)
                     {
-                        ruleMap.Add(possibleRuleKeys[0], column);
+                        ruleMap.Add(possibleRuleKey, column);
                     }
                 }
             }
