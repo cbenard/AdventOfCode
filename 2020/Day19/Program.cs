@@ -25,17 +25,17 @@ namespace Day19
             watch.Stop();
             Console.WriteLine($"Messages matching rule 0: {count} - Elapsed: {watch.Elapsed}");
 
-            // watch.Reset();
-            // watch.Start();
-            // Dictionary<int, string> overrideRules = new Dictionary<int, string>
-            // {
-            //     { 8, "42 | 42 8" },
-            //     { 11, "42 31 | 42 11 31" },
-            // };
-            // rules = ParseRules(ruleLines, overrideRules);
-            // count = GetMessageCountMatchingRule(rules[0], messages);
-            // watch.Stop();
-            // Console.WriteLine($"Messages matching rule 0 with overrides: {count} - Elapsed: {watch.Elapsed}");
+            watch.Reset();
+            watch.Start();
+            Dictionary<int, string> overrideRules = new Dictionary<int, string>
+            {
+                { 8, "42 | 42 42 | 42 42 42 | 42 42 42 42 | 42 42 42 42 42 | 42 42 42 42 42 42 | 42 42 42 42 42 42 42 | 42 42 42 42 42 42 42 42 | 42 42 42 42 42 42 42 42 42 | 42 42 42 42 42 42 42 42 42 42 | 42 42 42 42 42 42 42 42 42 42 42 | 42 42 42 42 42 42 42 42 42 42 42 42" },
+                { 11, "42 31 | 42 42 31 31 | 42 42 42 31 31 31 | 42 42 42 42 31 31 31 31 | 42 42 42 42 42 31 31 31 31 31 | 42 42 42 42 42 42 31 31 31 31 31 31 | 42 42 42 42 42 42 42 31 31 31 31 31 31 31" },
+            };
+            rules = ParseRules(ruleLines, overrideRules);
+            count = GetMessageCountMatchingRule(rules[0], messages);
+            watch.Stop();
+            Console.WriteLine($"Messages matching rule 0 with overrides: {count} - Elapsed: {watch.Elapsed}");
         }
 
         static int GetMessageCountMatchingRule(Regex regex, List<string> messages)
@@ -111,7 +111,7 @@ namespace Day19
             // Logical OR combinations of references to other rules by number
             else if (ruleText.Contains("|"))
             {
-                string[] parts = ruleText.Split('|');
+                var parts = ruleText.Split('|').Select(x => x.Trim());
                 regexString = String.Concat(
                     "(",
                     String.Join('|', parts.Select(x => ConvertToRegex(x, ruleLines))),
@@ -121,7 +121,7 @@ namespace Day19
             // One or more references to other rules by number
             else
             {
-                IEnumerable<int> parts = ruleText
+                var parts = ruleText
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Select(x => Int32.Parse(x));
                 regexString = String.Join(String.Empty, parts.Select(x => ConvertToRegex(ruleLines[x], ruleLines)));
